@@ -1,0 +1,284 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+#define MAX 5
+
+struct Customer {
+    int token;
+    string name;
+    string service;
+};
+
+Customer queue[MAX];
+
+int front = -1;
+int rear = -1;
+int tokenNumber = 1001;
+
+bool isEmpty() {
+    return front == -1;
+}
+
+bool isFull() {
+    return (rear + 1) % MAX == front;
+}
+
+int queueSize() {
+    if (isEmpty())
+        return 0;
+
+    if (rear >= front)
+        return rear - front + 1;
+
+    return MAX - front + rear + 1;
+}
+
+void addCustomer() {
+    if (isFull()) {
+        cout << "\nQueue is FULL!";
+        cout << "\nPlease wait until a customer is served.\n";
+        return;
+    }
+
+    Customer c;
+    c.token = tokenNumber++;
+
+    cout << "\nEnter Customer Name: ";
+    getline(cin >> ws, c.name);
+
+    cout << "Enter Service Required: ";
+    getline(cin >> ws, c.service);
+
+    if (isEmpty()) {
+        front = 0;
+        rear = 0;
+    } else {
+        rear = (rear + 1) % MAX;
+    }
+
+    queue[rear] = c;
+
+    cout << "\nCustomer Added Successfully!";
+    cout << "\nToken Number: " << c.token << endl;
+}
+
+void serveCustomer() {
+    if (isEmpty()) {
+        cout << "\nNo customers waiting!\n";
+        return;
+    }
+
+    cout << "\n----- Customer Served -----";
+    cout << "\nToken Number: " << queue[front].token;
+    cout << "\nName: " << queue[front].name;
+    cout << "\nService: " << queue[front].service;
+    cout << "\nRequest Resolved Successfully!\n";
+
+    if (front == rear) {
+        front = -1;
+        rear = -1;
+    } else {
+        front = (front + 1) % MAX;
+    }
+}
+
+void displayCustomers() {
+    if (isEmpty()) {
+        cout << "\nNo customers in the queue!\n";
+        return;
+    }
+
+    cout << "\n----- Waiting Customers -----\n";
+
+    int i = front;
+
+    while (true) {
+        cout << "\nToken: " << queue[i].token;
+        cout << "\nName: " << queue[i].name;
+        cout << "\nService: " << queue[i].service;
+        cout << "\n-------------------------\n";
+
+        if (i == rear)
+            break;
+
+        i = (i + 1) % MAX;
+    }
+}
+
+void nextCustomer() {
+    if (isEmpty()) {
+        cout << "\nNo customers waiting!\n";
+        return;
+    }
+
+    cout << "\n----- Next Customer -----";
+    cout << "\nToken: " << queue[front].token;
+    cout << "\nName: " << queue[front].name;
+    cout << "\nService: " << queue[front].service << endl;
+}
+
+void queueStatistics() {
+    int total = queueSize();
+
+    cout << "\n----- Queue Statistics -----";
+    cout << "\nCustomers Waiting: " << total;
+    cout << "\nMaximum Queue Capacity: " << MAX;
+    cout << "\nAvailable Spaces: " << MAX - total;
+    cout << "\nQueue Status: ";
+
+    if (total == 0)
+        cout << "Empty";
+    else if (total == MAX)
+        cout << "Full";
+    else
+        cout << "Available";
+
+    if (!isEmpty()) {
+        cout << "\nNext Token Number: " << queue[front].token;
+        cout << "\nNext Customer: " << queue[front].name;
+    }
+
+    cout << endl;
+}
+
+void serviceWiseAnalysis() {
+    if (isEmpty()) {
+        cout << "\nNo customers available for analysis.\n";
+        return;
+    }
+
+    string services[MAX];
+    int counts[MAX] = {0};
+    int uniqueServices = 0;
+
+    int i = front;
+
+    while (true) {
+        int j = 0;
+
+        while (j < uniqueServices &&
+               services[j] != queue[i].service) {
+            j++;
+        }
+
+        if (j == uniqueServices) {
+            services[uniqueServices] = queue[i].service;
+            counts[uniqueServices] = 1;
+            uniqueServices++;
+        } else {
+            counts[j]++;
+        }
+
+        if (i == rear)
+            break;
+
+        i = (i + 1) % MAX;
+    }
+
+    cout << "\n----- Service-Wise Analysis -----\n";
+
+    for (int j = 0; j < uniqueServices; j++) {
+        cout << services[j] << ": "
+             << counts[j] << " customer(s)\n";
+    }
+}
+
+void searchCustomerByToken() {
+    if (isEmpty()) {
+        cout << "\nNo customers waiting!\n";
+        return;
+    }
+
+    int searchToken;
+    cout << "\nEnter Token Number to Search: ";
+    cin >> searchToken;
+
+    int i = front;
+
+    while (true) {
+        if (queue[i].token == searchToken) {
+            cout << "\n----- Customer Found -----";
+            cout << "\nToken: " << queue[i].token;
+            cout << "\nName: " << queue[i].name;
+            cout << "\nService: " << queue[i].service << endl;
+            return;
+        }
+
+        if (i == rear)
+            break;
+
+        i = (i + 1) % MAX;
+    }
+
+    cout << "\nCustomer with Token " << searchToken
+         << " not found in the waiting queue.\n";
+}
+
+int main() {
+    int choice;
+
+    do {
+        cout << "\n==============================";
+        cout << "\n BANK CUSTOMER SERVICE SYSTEM";
+        cout << "\n==============================";
+
+        cout << "\n1. Add Customer";
+        cout << "\n2. Serve Customer";
+        cout << "\n3. Display Waiting Customers";
+        cout << "\n4. View Next Customer";
+        cout << "\n5. Queue Statistics";
+        cout << "\n6. Service-Wise Analysis";
+        cout << "\n7. Search Customer by Token";
+        cout << "\n8. Exit";
+
+        cout << "\n\nEnter Your Choice: ";
+
+        if (!(cin >> choice)) {
+            cin.clear();
+            cin.ignore(10000, '\n');
+            cout << "\nInvalid Input!\n";
+            continue;
+        }
+
+        switch (choice) {
+            case 1:
+                addCustomer();
+                break;
+
+            case 2:
+                serveCustomer();
+                break;
+
+            case 3:
+                displayCustomers();
+                break;
+
+            case 4:
+                nextCustomer();
+                break;
+
+            case 5:
+                queueStatistics();
+                break;
+
+            case 6:
+                serviceWiseAnalysis();
+                break;
+
+            case 7:
+                searchCustomerByToken();
+                break;
+
+            case 8:
+                cout << "\nThank you for using the system!\n";
+                break;
+
+            default:
+                cout << "\nInvalid Choice! Try Again.\n";
+        }
+
+    } while (choice != 8);
+
+    return 0;
+}
